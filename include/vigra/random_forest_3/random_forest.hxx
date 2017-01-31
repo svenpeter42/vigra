@@ -324,7 +324,7 @@ void RandomForest<FEATURES, LABELS, SPLITTESTS, ACC>::predict_probabilities_impl
 
         const auto & vec = node_responses_.at(node);
         double const n = std::accumulate(vec.begin(), vec.end(), static_cast<double>(0));
-        for(auto cc = 0; cc < class_vec.size(); ++cc)
+        for(auto cc = 0; cc < vec.size(); ++cc)
             probs(i,cc) += vec[cc] / n;
     }
 }
