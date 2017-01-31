@@ -309,6 +309,9 @@ void RandomForest<FEATURES, LABELS, SPLITTESTS, ACC>::predict_probabilities_impl
     
     auto num_roots = graph_.numRoots();
 
+    std::vector<AccInputType> tree_results;
+    tree_results.reserve(num_roots);
+
     auto const sub_features = features.template bind<0>(i);
     for (auto k = 0; k < num_roots; ++k)
     {
@@ -318,14 +321,11 @@ void RandomForest<FEATURES, LABELS, SPLITTESTS, ACC>::predict_probabilities_impl
             size_t const child_index = split_tests_.at(node)(sub_features);
             node = graph_.getChild(node, child_index);
         }
-        const auto & class_vec = node_responses_.at(node);
-        for(auto cc = 0; cc < class_vec.size(); ++cc)
-            probs(i,cc) += class_vec[cc];
+        tree_results.push_back(node_responses_.at(node));
     }
-    
-    for(auto c = 0; c < problem_spec_.num_classes_; ++c) {
-        probs(i,c) /= num_roots; 
-    }
+
+    auto sub_probs = probs.template bind<0>(i);
+    acc(tree_results.begin(), tree_results.end(), sub_probs.begin());
 }
 
 template <typename FEATURES, typename LABELS, typename SPLITTESTS, typename ACC>
